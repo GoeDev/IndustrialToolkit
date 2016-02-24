@@ -55,7 +55,7 @@ foreach($arrMaterials as $material) {
     die("Database Error: ".$mysqli->error());
   $mat_name = $result->fetch_array(MYSQLI_ASSOC)["name"];
 
-  $return_array["mats"][] = array("name" => $mat_name, "typeID" => $material["typeID"], get_price($region_id, $type_id, "buy", CEILING));
+  $return_array["mats"][] = array("name" => $mat_name, "typeID" => $material["typeID"], "price" => get_price($region_id, $type_id, "buy", CEILING), "quantity" => $material["quantity"]);
 }
 
 //Return Array
