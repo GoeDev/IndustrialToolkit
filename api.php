@@ -18,12 +18,11 @@ if(!isset($_GET["typename"]) || !isset($_GET["regionid"]))
 $name=$mysqli->real_escape_string($_GET["typename"]);
 $region_id=$mysqli->real_escape_string($_GET["regionid"]); //Gotta love PHP
 
-//Get actual Type ID
-$query = "SELECT id FROM typeids WHERE name='$name'";
+//Get Type ID of blueprint
+$query = "SELECT id FROM typeids WHERE name='$name Blueprint'";
 $result = $mysqli->query($query);
 if(!$result)
   die("Database Error: ".$mysqli->error());
-
 $type_id = $result->fetch_array(MYSQLI_ASSOC)["id"];
 
 //Get blueprint data
@@ -35,6 +34,13 @@ if(!$result)
 $arrBlueprint = $result->fetch_array(MYSQLI_ASSOC);
 $arrMaterials = unserialize(base64_decode($arrBlueprint["materials"]));
 $arrProducts = unserialize(base64_decode($arrBlueprint["products"]));
+
+//Get actual Type ID
+$query = "SELECT id FROM typeids WHERE name='$name'";
+$result = $mysqli->query($query);
+if(!$result)
+  die("Database Error: ".$mysqli->error());
+$type_id = $result->fetch_array(MYSQLI_ASSOC)["id"];
 
 $return_array = array("name" => $name,
   "typeID" => $type_id,
@@ -68,7 +74,7 @@ function get_price($region_id, $type_id, $action, $direction) {
     elseif($direction == CEILING && $item["price"] < $ret)
       $ret = $item["price"];
   }
-  return $ret;
+  return ($ret == INF)?0:$ret;
 }
 
 ?>
