@@ -1,6 +1,5 @@
 <?php
 require_once("config.inc.php");
-require_once(getcwd()."/spyc/Spyc.php");
 
 //Evil! I'm really sorry for this.
 ini_set('memory_limit', '1024M');
