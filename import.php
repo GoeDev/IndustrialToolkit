@@ -90,7 +90,7 @@ foreach($typeids as $id=>$array) {
 }
 
 if(sizeof($arr_unusable_typeids) > 0)
-  echo "Skipped ".sizeof($arr_unusable_typeids)." blueprints: Missing manufacturing information.\n";
+  echo "Skipped ".sizeof($arr_unusable_typeids)." typeids: Missing manufacturing information.\n";
 
 echo "All done :)\n";
 
