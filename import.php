@@ -38,8 +38,18 @@ download_and_unpack($src_typeIDs, getcwd()."/typeids.yaml");
 echo "Loading blueprints...\n";
 $blueprints = yaml_parse(file_get_contents(getcwd()."/blueprints.yaml"));
 echo "Importing blueprints...\n";
+
+$arr_unusable_blueprints=array();
+
 foreach($blueprints as $blueprint) {
   $id = $blueprint["blueprintTypeID"];
+
+  //Appereantly, some blueprints can not be manufactured
+  if(!isset($blueprint["activities"]["manufacturing"]) || !isset($blueprint["activities"]["manufacturing"]["materials"]) || !isset($blueprint["activities"]["manufacturing"]["products"])){
+    $arr_unusable_blueprints[] = $id;
+    continue;
+  }
+
   //Not the prettiest way to save this type of data, but it suffices in this case
   $manufacturing = $blueprint["activities"]["manufacturing"];
   $materials = base64_encode(serialize($manufacturing["materials"]));
@@ -51,6 +61,9 @@ foreach($blueprints as $blueprint) {
     die("Database Error while importing:".$mysqli->error);
 }
 
+if(sizeof($arr_unusable_blueprints) > 0)
+  echo "Skipped ".sizeof($arr_unusable_blueprints)." blueprints: Missing manufacturing information.\n";
+
 //Free memory
 unset($blueprints);
 
@@ -58,16 +71,28 @@ unset($blueprints);
 echo "Loading typeIDs...\n";
 $typeids = yaml_parse(file_get_contents(getcwd()."/typeids.yaml"));
 echo "Importing typeIDs...\n";
+
+$arr_unusable_typeids = array();
+
 foreach($typeids as $id=>$array) {
-  $name = $array["name"]["en"];
+
+  if(!isset($array["name"]["en"])) {
+    $arr_unusable_typeids[] = $id;
+    continue;
+  }
+
+  $name = str_replace("'", "''", $array["name"]["en"]); //Some escaping
 
   $query = "INSERT INTO typeids(id, name) VALUES($id, '$name')";
   $result = $mysqli->query($query);
   if(!$result)
-    die("Database Error while importing:".$mysqli->error);
+    die("Database Error while importing: ".$mysqli->error." $query");
 }
 
-echo "All done :)";
+if(sizeof($arr_unusable_typeids) > 0)
+  echo "Skipped ".sizeof($arr_unusable_typeids)." blueprints: Missing manufacturing information.\n";
+
+echo "All done :)\n";
 
 $mysqli->close();
 
