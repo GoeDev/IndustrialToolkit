@@ -1,6 +1,10 @@
 <?php
 require_once("config.inc.php");
 require_once(getcwd()."/spyc/Spyc.php");
+
+//Evil! I'm really sorry for this.
+ini_set('memory_limit', '1024M');
+
 /*
 imports data from SDE (typeIDs, blueprints)
 */
@@ -25,7 +29,7 @@ $query = "CREATE TABLE IF NOT EXISTS typeids (id INT NOT NULL, name VARCHAR(255)
 $result = $mysqli->query($query);
 if(!$result)
   die("Database error: ".$mysqli->error);
-
+/*
 //Download and unpack sources
 echo "Downloading and unpacking sources...\n";
 download_and_unpack($src_blueprint, getcwd()."/blueprints.yaml");
@@ -50,7 +54,7 @@ foreach($blueprints as $blueprint) {
 
 //Free memory
 unset($blueprints);
-
+*/
 //Import typeids
 echo "Loading typeIDs...\n";
 $typeids = Spyc::YAMLLoad(getcwd()."/typeids.yaml");
@@ -59,9 +63,9 @@ foreach($typeids as $id=>$array) {
   $name = $array["name"]["en"];
 
   $query = "INSERT INTO typeids(id, name) VALUES($id, '$name')";
-  $result = $mysqli->query($query);
+  /*$result = $mysqli->query($query);
   if(!$result)
-    die("Database Error while importing:".$mysqli->error);
+    die("Database Error while importing:".$mysqli->error);*/
 }
 
 echo "All done :)";
