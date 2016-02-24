@@ -55,15 +55,15 @@ foreach($arrMaterials as $material) {
     die("Database Error: ".$mysqli->error());
   $mat_name = $result->fetch_array(MYSQLI_ASSOC)["name"];
 
-  $return_array["mats"][] = array("name" => $mat_name, "typeID" => $material["typeID"], "price" => get_price($region_id, $type_id, "buy", CEILING), "quantity" => $material["quantity"]);
+  $return_array["mats"][] = array("name" => $mat_name, "typeID" => $material["typeID"], "price" => get_price($region_id, $material["typeID"], "buy", CEILING), "quantity" => $material["quantity"]);
 }
 
 //Return Array
 echo json_encode($return_array);
 
 //returns lowest or highest ask/bid price for specified Item
-function get_price($region_id, $type_id, $action, $direction) {
-  $request_url="https://public-crest.eveonline.com/market/$region_id/orders/$action/?type=https://public-crest.eveonline.com/types/$type_id/";
+function get_price($region, $type, $action, $direction) {
+  $request_url="https://public-crest.eveonline.com/market/$region/orders/$action/?type=https://public-crest.eveonline.com/types/$type/";
 
   $ret = ($direction == FLOOR) ? INF:0;
 
@@ -71,9 +71,10 @@ function get_price($region_id, $type_id, $action, $direction) {
   foreach($orders["items"] as $item) {
     if($direction == FLOOR && $item["price"] < $ret)
       $ret = $item["price"];
-    elseif($direction == CEILING && $item["price"] < $ret)
+    elseif($direction == CEILING && $item["price"] > $ret)
       $ret = $item["price"];
   }
+
   return ($ret == INF)?0:$ret;
 }
 
