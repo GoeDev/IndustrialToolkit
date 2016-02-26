@@ -51,6 +51,7 @@ $type_id = $result->fetch_array(MYSQLI_ASSOC)["id"];
 $return_array = array("name" => $name,
   "typeID" => $type_id,
   "price" => get_price($region_id, $type_id, "sell", FLOOR),
+  "quantity" => $arrProducts[0]["quantity"],
   "mats" => array());
 
 //fill mats array
