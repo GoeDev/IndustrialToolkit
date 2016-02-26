@@ -77,9 +77,7 @@ function get_price($region, $type, $action, $direction) {
 
   $orders = json_decode(file_get_contents($request_url), true);
   foreach($orders["items"] as $item) {
-    if($direction == FLOOR && $item["price"] < $ret)
-      $ret = $item["price"];
-    elseif($direction == CEILING && $item["price"] > $ret)
+    if(($direction == FLOOR && $item["price"] < $ret) || ($direction == CEILING && $item["price"] > $ret))
       $ret = $item["price"];
   }
 
