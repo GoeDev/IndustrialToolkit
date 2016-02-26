@@ -12,10 +12,10 @@ if ($mysqli->connect_error) {
 
 //Check URL params
 if(!isset($_GET["typename"]) || !isset($_GET["regionid"]))
-  die("Error: Please supply type name and region ID.");
+  die("Error: Please supply type name and region ID like this: /api.php?typename=Warrior%20I&amp;regionid=10000002");
 
 //Just for making sure nobody messes up our database
-$name=$mysqli->real_escape_string($_GET["typename"]);
+$name=$mysqli->real_escape_string(str_ireplace("+"," ",$_GET["typename"]));
 $region_id=$mysqli->real_escape_string($_GET["regionid"]); //Gotta love PHP
 
 //Get Type ID of blueprint
@@ -23,6 +23,8 @@ $query = "SELECT id FROM typeids WHERE name='$name Blueprint'";
 $result = $mysqli->query($query);
 if(!$result)
   die("Database Error: ".$mysqli->error());
+if($result->num_rows != 1)
+  die("TypeID not found or multiple Items found.");
 $type_id = $result->fetch_array(MYSQLI_ASSOC)["id"];
 
 //Get blueprint data
@@ -30,6 +32,8 @@ $query = "SELECT * FROM blueprints WHERE id=$type_id";
 $result = $mysqli->query($query);
 if(!$result)
   die("Database Error: ".$mysqli->error());
+if($result->num_rows != 1)
+  die("Blueprint not found or multiple Items found.");
 
 $arrBlueprint = $result->fetch_array(MYSQLI_ASSOC);
 $arrMaterials = unserialize(base64_decode($arrBlueprint["materials"]));
@@ -40,6 +44,8 @@ $query = "SELECT id FROM typeids WHERE name='$name'";
 $result = $mysqli->query($query);
 if(!$result)
   die("Database Error: ".$mysqli->error());
+if($result->num_rows != 1)
+  die("TypeID not found or multiple Items found.");
 $type_id = $result->fetch_array(MYSQLI_ASSOC)["id"];
 
 $return_array = array("name" => $name,
@@ -53,6 +59,8 @@ foreach($arrMaterials as $material) {
   $result = $mysqli->query($query);
   if(!$result)
     die("Database Error: ".$mysqli->error());
+  if($result->num_rows != 1)
+    die("Error in material database: multiple or no entries for material $material[typeID]");
   $mat_name = $result->fetch_array(MYSQLI_ASSOC)["name"];
 
   $return_array["mats"][] = array("name" => $mat_name, "typeID" => $material["typeID"], "price" => get_price($region_id, $material["typeID"], "buy", CEILING), "quantity" => $material["quantity"]);
