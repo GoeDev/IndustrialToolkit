@@ -6,9 +6,4 @@ $db_user = "";
 $db_password = "";
 $db_database = "";
 
-//Data Sources
-$src_blueprint = "https://www.fuzzwork.co.uk/dump/latest/blueprints.yaml.bz2";
-$src_typeIDs = "https://www.fuzzwork.co.uk/dump/latest/typeIDs.yaml.bz2";
-
-
 ?>
