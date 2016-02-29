@@ -78,7 +78,7 @@ foreach($arrMaterials as $material) {
 
   $return_array["mats"][] = array("name" => $mat_name, "typeID" => $material["materialTypeID"], "price" => get_price($region_id, $material["materialTypeID"], "buy", CEILING), "quantity" => $material["quantity"]);
 }
-echo " ,$blueprint_type_id";
+
 //Return Array
 echo json_encode($return_array);
 
