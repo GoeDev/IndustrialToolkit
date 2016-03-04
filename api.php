@@ -19,52 +19,64 @@ $name=$mysqli->real_escape_string(str_ireplace("+"," ",$_GET["typename"]));
 $region_id=$mysqli->real_escape_string($_GET["regionid"]); //Gotta love PHP
 
 //Get Type ID of blueprint
-$query = "SELECT id FROM typeids WHERE name='$name Blueprint'";
+$query = "SELECT typeID FROM invTypes WHERE typeName='$name Blueprint'";
 $result = $mysqli->query($query);
 if(!$result)
-  die("Database Error: ".$mysqli->error());
+  die("Database Error: ".$mysqli->error);
 if($result->num_rows != 1)
   die("TypeID not found or multiple Items found.");
-$type_id = $result->fetch_array(MYSQLI_ASSOC)["id"];
+$blueprint_type_id = $result->fetch_array(MYSQLI_ASSOC)["typeID"];
 
-//Get blueprint data
-$query = "SELECT * FROM blueprints WHERE id=$type_id";
+//Get blueprint product data
+$query = "SELECT * FROM industryActivityProducts WHERE typeID=$blueprint_type_id AND activityID=1";
 $result = $mysqli->query($query);
 if(!$result)
-  die("Database Error: ".$mysqli->error());
-if($result->num_rows != 1)
-  die("Blueprint not found or multiple Items found.");
+  die("Database Error: ".$mysqli->error);
+if($result->num_rows < 1)
+  die("Blueprint products not found.");
 
-$arrBlueprint = $result->fetch_array(MYSQLI_ASSOC);
-$arrMaterials = unserialize(base64_decode($arrBlueprint["materials"]));
-$arrProducts = unserialize(base64_decode($arrBlueprint["products"]));
+$arrProducts = $result->fetch_array(MYSQLI_ASSOC);
 
 //Get actual Type ID
-$query = "SELECT id FROM typeids WHERE name='$name'";
+$query = "SELECT typeID FROM invTypes WHERE typeName='$name'";
 $result = $mysqli->query($query);
 if(!$result)
-  die("Database Error: ".$mysqli->error());
+  die("Database Error: ".$mysqli->error);
 if($result->num_rows != 1)
   die("TypeID not found or multiple Items found.");
-$type_id = $result->fetch_array(MYSQLI_ASSOC)["id"];
+$type_id = $result->fetch_array(MYSQLI_ASSOC)["typeID"];
 
 $return_array = array("name" => $name,
   "typeID" => $type_id,
   "price" => get_price($region_id, $type_id, "sell", FLOOR),
-  "quantity" => $arrProducts[0]["quantity"],
+  "quantity" => $arrProducts["quantity"],
   "mats" => array());
+
+//Get blueprint material data
+$query = "SELECT * FROM industryActivityMaterials WHERE typeID=$blueprint_type_id AND activityID=1"; //activityID=1 => manufacturing
+$result = $mysqli->query($query);
+if(!$result)
+  die("Database Error: ".$mysqli->error);
+if($result->num_rows < 1)
+  die("Blueprint materials not found.");
+
+//Because fetch_all doesn't always work
+$arrMaterials=array();
+while($material = $result->fetch_array()) {
+  $arrMaterials[] = $material;
+}
 
 //fill mats array
 foreach($arrMaterials as $material) {
-  $query = "SELECT name FROM typeids WHERE id=$material[typeID]";
+  $query = "SELECT typeName FROM invTypes WHERE typeID=$material[materialTypeID]";
   $result = $mysqli->query($query);
   if(!$result)
-    die("Database Error: ".$mysqli->error());
+    die("Database Error: ".$mysqli->error);
   if($result->num_rows != 1)
-    die("Error in material database: multiple or no entries for material $material[typeID]");
-  $mat_name = $result->fetch_array(MYSQLI_ASSOC)["name"];
+    die("Multiple or no entries for material $material[materialTypeID]");
+  $mat_name = $result->fetch_array(MYSQLI_ASSOC)["typeName"];
 
-  $return_array["mats"][] = array("name" => $mat_name, "typeID" => $material["typeID"], "price" => get_price($region_id, $material["typeID"], "buy", CEILING), "quantity" => $material["quantity"]);
+  $return_array["mats"][] = array("name" => $mat_name, "typeID" => $material["materialTypeID"], "price" => get_price($region_id, $material["materialTypeID"], "buy", CEILING), "quantity" => $material["quantity"]);
 }
 
 //Return Array
