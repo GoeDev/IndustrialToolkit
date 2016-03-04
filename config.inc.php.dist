@@ -5,5 +5,9 @@ $db_host = "";
 $db_user = "";
 $db_password = "";
 $db_database = "";
-
+// Redisstuff
+$redis_host = "";
+redis_port = "";
+$redis_auth = "";
+$redis_db = "";
 ?>
