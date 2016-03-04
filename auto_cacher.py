@@ -20,7 +20,7 @@ password= ""
 db = "eve_sde"
 ## Setup for DB connection
 try:
-    eve_sde = MySQLdb.connect("localhost","eve","","eve_sde",cursorclass=MySQLdb.cursors.DictCursor)
+    eve_sde = MySQLdb.connect("localhost","username","password","dbname",cursorclass=MySQLdb.cursors.DictCursor)
     cursor = eve_sde.cursor()
     logger.info("DB setup completed")
 except BaseException as e:
@@ -28,7 +28,7 @@ except BaseException as e:
     raise SystemExit(1)
 ## Setup for redis
 try:
-    redis = redis.StrictRedis(host="localhost",password="Fuehrerschein123")
+    redis = redis.StrictRedis(host="localhost",password="password")
     logger.info("Redis setup completed")
 except BaseException as e:
     logger.exception(e)
