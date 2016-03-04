@@ -13,7 +13,7 @@ For the Documentation take look at the [wiki](https://github.com/GoeDev/Industri
 
 * Documentation
 * Compressed-Ore json api
-* ~~Price Caching from crest~~
+* ~~Price Caching from crest~~ done (hopefully :D)
 * Import player owned BP and import ME/PE from them
 
 
