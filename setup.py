@@ -18,10 +18,10 @@ hdlr.setFormatter(formatter)
 logger.addHandler(hdlr)
 logger.setLevel(logging.DEBUG)
 
-host = "localhost"
-user = "eve"
+host = ""
+user = ""
 password= ""
-db = "eve_sde"
+db = ""
 try:
     eve_sde = MySQLdb.connect(host,user,password,db,cursorclass=MySQLdb.cursors.DictCursor)
     logger.info("Connect successful!")
