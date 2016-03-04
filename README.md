@@ -6,14 +6,23 @@ This is a project from EVE-Online community members to ease the industrials day-
 
 We will provide an extensive Toolkit that's easy to use for the common miner or industrial.
 
-For the Documentation take look at the [wiki](https://github.com/GoeDev/IndustrialToolkit/wiki).
+For just basic use: [api](http://noodel.me/api.php)
+
+Do it like this: `noodel.me/api.php?typename="provide a typename here"&regionid="regionid pls"`
+
+The typname may include spaces.
+
+For the Documentation and how to install this services on your own server take look at the [wiki](https://github.com/GoeDev/IndustrialToolkit/wiki).
 
 
 ## Roadmap
 
 * Documentation
+* api accepting region name as parameter instead of regionid too
+* api url builder with clicking...
+* make working gs import script
 * Compressed-Ore json api
-* ~~Price Caching from crest~~ done (hopefully :D)
+* ~~Price Caching from crest~~ done (hopefully :D) worx by now... some values are still not right...
 * Import player owned BP and import ME/PE from them
 
 
