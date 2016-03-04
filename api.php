@@ -9,6 +9,13 @@ $mysqli = new mysqli($db_host, $db_user, $db_password, $db_database);
 if ($mysqli->connect_error) {
   die('Connect Error (' .$mysqli->connect_errno.') '.$mysqli->connect_error);
 }
+$redis = new redis();
+$redis->connect($redis_host, $redis_port);
+$redis->auth($redis_auth);
+$redis->select($redis_db)
+if ($redis->RedisException){
+  die('Connect Error(RedisException returned false, the caching server may be down or overloaded)');
+}
 
 //Check URL params
 if(!isset($_GET["typename"]) || !isset($_GET["regionid"]))
@@ -76,13 +83,14 @@ foreach($arrMaterials as $material) {
     die("Multiple or no entries for material $material[materialTypeID]");
   $mat_name = $result->fetch_array(MYSQLI_ASSOC)["typeName"];
 
-  $return_array["mats"][] = array("name" => $mat_name, "typeID" => $material["materialTypeID"], "price" => get_price($region_id, $material["materialTypeID"], "buy", CEILING), "quantity" => $material["quantity"]);
+  //$return_array["mats"][] = array("name" => $mat_name, "typeID" => $material["materialTypeID"], "price" => get_price($region_id, $material["materialTypeID"], "buy", CEILING), "quantity" => $material["quantity"]);
+  $return_array["mats"][] = array("name" => $mat_name, "typeID" => $material["materialTypeID"], "price" => get_cached_price($region_id, $material["materialTypeID"]), "quantity" => $material["quantity"])
 }
 
 //Return Array
 echo json_encode($return_array);
 
-//returns lowest or highest ask/bid price for specified Item
+//returns lowest or highest ask/bid price for specified Item directly pulls from CREST
 function get_price($region, $type, $action, $direction) {
   $request_url="https://public-crest.eveonline.com/market/$region/orders/$action/?type=https://public-crest.eveonline.com/types/$type/";
 
@@ -95,6 +103,11 @@ function get_price($region, $type, $action, $direction) {
   }
 
   return ($ret == INF)?0:$ret;
+}
+// returns the price from the cached redis hash. currently only sell order prices avail.
+function get_cached_price($region, $type){
+  $price = $redis->hGet($type, $region);
+  return $price
 }
 
 ?>

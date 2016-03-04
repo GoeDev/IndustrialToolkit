@@ -16,7 +16,7 @@ hdlr = logging.FileHandler('setup.log')
 formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
 hdlr.setFormatter(formatter)
 logger.addHandler(hdlr)
-logger.setLevel(logging.INFO)
+logger.setLevel(logging.DEBUG)
 
 host = "localhost"
 user = "eve"
@@ -40,6 +40,7 @@ except BaseException as e:
     raise SystemExit(1)
 
 groupids = [2,4,9,11,24,157,475,477,1320,1849]
+exclude = [354496,350001]
 ##Type crawling
 types = []
 try:
@@ -47,48 +48,60 @@ try:
     logger.info("TypeID Query went well")
     results = cursor.fetchall()
     for result in results:
-        marketIDquery="SELECT * FROM invMarketGroups WHERE marketGroupID = {:d};".format(result['marketGroupID'])
-        logger.info(marketIDquery)
-        cursor.execute(marketIDquery)
-        groupcheck_first = cursor.fetchall()
-        #logger.info("groupcheck_first")
-        #logger.info(groupcheck_first)
-        #print(groupcheck_first)
-        groupcheck_first_item = groupcheck_first[0]
-        #logger.info("groupcheck_first_item")
-        #logger.info(groupcheck_first_item)
-        marketGroupIDs = groupcheck_first_item['parentGroupID']
-        while marketGroupIDs != None:
-            logger.info("entered While loop")
-            query="SELECT * FROM invMarketGroups WHERE marketGroupID = {:d};".format(marketGroupIDs)
-            logger.info(query)
-            cursor.execute(query)
-            groupchecks = cursor.fetchall()
-            #print(groupchecks)
-            groupcheck_item = groupchecks[0]
-            marketGroupIDs = groupcheck_item['parentGroupID']
-            #logger.info("marketGroupIDs: {:d};".format(marketGroupIDs))
-            #logger.info("parentGroupID: {:d};".format(groupcheck_item['parentGroupID']))
-            if groupcheck_item['marketGroupID'] in groupids:
-                types.append({'typeID':result['typeID'],'typeName':result['typeName'],'marketGroupID':result['marketGroupID']})
+        try:
+            if result['marketGroupID'] in exclude:
+                continue
+            marketIDquery="SELECT * FROM invMarketGroups WHERE marketGroupID = {:d} AND parentGroupID IS NOT NULL;".format(result['marketGroupID'])
+            logger.info(marketIDquery)
+            cursor.execute(marketIDquery)
+            groupcheck_first = cursor.fetchall()
+            #logger.info("groupcheck_first")
+            #logger.info(groupcheck_first)
+            #print(groupcheck_first)
+            groupcheck_first_item = groupcheck_first[0]
+            logger.debug("groupcheck_first_item")
+            logger.debug(groupcheck_first_item)
+            marketGroupIDs = groupcheck_first_item['parentGroupID']
+            while marketGroupIDs != None:
+                logger.info("entered While loop")
+                query="SELECT * FROM invMarketGroups WHERE marketGroupID = {:d};".format(marketGroupIDs)
+                logger.debug(query)
+                cursor.execute(query)
+                groupchecks = cursor.fetchall()
+                #print(groupchecks)
+                groupcheck_item = groupchecks[0]
+                marketGroupIDs = groupcheck_item['parentGroupID']
+                logger.debug("marketGroupIDs: {0};".format(marketGroupIDs))
+                #logger.info("parentGroupID: {0};".format(groupcheck_item['parentGroupID']))
+                if groupcheck_item['marketGroupID'] in groupids:
+                    types.append({'typeID':result['typeID'],'typeName':result['typeName'],'marketGroupID':result['marketGroupID']})
+        except IndexError:
+            exclude.append(marketGroupIDs)
 except BaseException as e:
     logger.exception(e)
     raise SystemExit(1)
 ## Dont know if i need this as it is here anymore
 try:
+
     def insert_array(insert_item):
-        insert_command='INSERT INTO types_crawl_crest(typeID,typeName,marketGroupID) VALUES ('+insert_item["typeID"]+','+insert_item['typeName']+','+insert_item['marketGroupID']+');'
-        cursor.execute(insert_commands)
+        typeid = "{}".format(insert_item["typeID"])
+        marketGroupID = "{}".format(insert_item['marketGroupID'])
+        insert_command="INSERT INTO types_crawl_crest(typeID,typeName,marketGroupID) VALUES ("+typeid+",\""+insert_item['typeName']+'\",'+marketGroupID+');'
+        logger.debug("insert_command")
+        logger.debug(insert_command)
+        cursor.execute(insert_command)
         return
     for item in types:
+        logger.debug("l89: {item}".format(item = item))
         insert_array(item)
-        logger.info(item)
+
+    eve_sde.commit()
     logger.info("Insert was successful!")
 except BaseException as e:
     logger.error("{!r}".format(e))
     raise SystemExit(1)
 
 eve_sde.close()
-Logger.info("We did it! Finished setup without errors.")
+logger.info("We did it! Finished setup without errors.")
 print("We did it! Finished setup without errors.")
 raise SystemExit(0)
