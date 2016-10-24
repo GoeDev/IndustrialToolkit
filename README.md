@@ -10,7 +10,7 @@ For just basic use: [api](http://noodel.me/api.php)
 
 Do it like this: `noodel.me/api.php?typename="provide a typename here"&regionid="regionid pls"`
 
-The typname may include spaces.
+The typename may include spaces.
 
 For the Documentation and how to install this services on your own server take look at the [wiki](https://github.com/GoeDev/IndustrialToolkit/wiki).
 
